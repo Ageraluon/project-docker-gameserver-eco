@@ -8,3 +8,4 @@ Things to do:
 - Add function to automatically download newer eco server files from the forum, if a valid username/password for a forum account with access to the files is provided
 - Attach an X Server to show the GUI in a VNC client
 
+If you would like to extend the script's functionality, pull requests are welcome!
