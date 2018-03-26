@@ -6,5 +6,5 @@ In order to run, navigate into the folder where you have extracted the docker-co
 Things to do:
 - Add switches for all important settings in the docker-compose and dockerfile
 - Add function to automatically download newer eco server files from the forum, if a valid username/password for a forum account with access to the files is provided
-
+- Attach an X Server to show the GUI in a VNC client
 
