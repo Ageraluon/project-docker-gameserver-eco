@@ -1,0 +1,61 @@
+FROM mono:latest
+LABEL maintainer="Ageraluon"
+#Name of the ecoserver file outside the dockerfile
+ARG EcoFile=EcoServer.zip
+SHELL ["/bin/bash", "-c"]
+#Avoids prompts for input
+ENV DEBIAN_FRONTEND noninteractive  
+
+#Variables containing the default values for the variables that can be changed in the docker-compose file
+ENV WORLD_SIZE_X=72
+ENV WORLD_SIZE_Y=72
+ENV METEOR_IMPACT_DAYS=30
+
+#install unzip
+RUN apt-get update && apt-get install -y unzip && apt-get clean -y
+
+RUN mkdir /ecoserver
+
+#Populate with files
+ADD $EcoFile .
+RUN unzip $EcoFile -d /ecoserver && rm $EcoFile
+WORKDIR /ecoserver
+
+#Temporarily rename the config and storage folders that will be shared with the host as volumes.
+#For the first run, the start script will find empty folders and move the files there. For subsequent runs,
+#the files in the shared folders will be used
+RUN mv Configs Configs_org && mv Storage Storage_org && mkdir Configs && mkdir Storage
+
+VOLUME /ecoserver/Configs
+VOLUME /ecoserver/Storage
+
+#write the start script 
+RUN echo "#!/bin/bash" > start.sh &&\
+#Check if shared directory is empty on the host, if yes
+	echo "if [ -z \"\$(ls -A Configs)\" ]; then" >> start.sh &&\
+#Populate the folder with the original files for first start. The server will compile these.
+	echo "cp -a Configs_org/. Configs" >> start.sh &&\
+	echo "fi" >> start.sh &&\
+#Check if shared directory is empty on the host, if yes	
+	echo "if [ -z \"\$(ls -A Storage)\" ]; then" >> start.sh &&\
+#Populate the folder with the original files for first start. The server will compile these.	
+	echo "cp -a Storage_org/. Storage && export NEWGAME='1'" >> start.sh &&\
+	echo "fi" >> start.sh &&\
+#Replace partial world settings if a new game is started	
+	echo "if [ ! -z '\$NEWGAME' ]; then" >> start.sh &&\
+#Example: World size x and y
+	echo "sed -i_org 's/\\(.*\"x\":.*\\)72\\(.*\\)/\\1'\$WORLD_SIZE_X'\\2/' /ecoserver/Configs/WorldGenerator.eco" >> start.sh &&\
+	echo "sed -i_org 's/\\(.*\"y\":.*\\)72\\(.*\\)/\\1'\$WORLD_SIZE_Y'\\2/' /ecoserver/Configs/WorldGenerator.eco" >> start.sh &&\
+	echo "sed -i_org 's/\\(.*\"MeteorImpactDays\":.\\)30\\(.*\\)/\\1'\$METEOR_IMPACT_DAYS'\\2/' /ecoserver/Configs/Disasters.eco" >> start.sh &&\
+	echo "fi" >> start.sh &&\
+	echo "mono EcoServer.exe -nogui" >> start.sh
+#make start script executable
+RUN chmod +x start.sh
+
+#Command to run at container start
+ENTRYPOINT ["/ecoserver/start.sh"]
+
+#Ports that need to be exposed to the host
+EXPOSE 2999 3000 3001
+
+
