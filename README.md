@@ -9,3 +9,7 @@ Things to do:
 - Attach an X Server to show the GUI in a VNC client
 
 If you would like to extend the script's functionality, pull requests are welcome!
+
+
+Thank you to the following authors for their contributions:
+@cordbleibaum
