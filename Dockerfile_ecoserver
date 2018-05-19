@@ -4,7 +4,7 @@ LABEL maintainer="Ageraluon"
 ARG EcoFile=EcoServer.zip
 SHELL ["/bin/bash", "-c"]
 #Avoids prompts for input
-ENV DEBIAN_FRONTEND noninteractive  
+ENV DEBIAN_FRONTEND noninteractive
 
 #Variables containing the default values for the variables that can be changed in the docker-compose file
 ENV WORLD_SIZE_X=72
@@ -24,24 +24,24 @@ WORKDIR /ecoserver
 #Temporarily rename the config and storage folders that will be shared with the host as volumes.
 #For the first run, the start script will find empty folders and move the files there. For subsequent runs,
 #the files in the shared folders will be used
-RUN mv Configs Configs_org && mv Storage Storage_org && mkdir Configs && mkdir Storage
+RUN mv Configs Configs_org && mkdir Configs && mkdir Storage
 
 VOLUME /ecoserver/Configs
 VOLUME /ecoserver/Storage
 
-#write the start script 
+#write the start script
 RUN echo "#!/bin/bash" > start.sh &&\
 #Check if shared directory is empty on the host, if yes
 	echo "if [ -z \"\$(ls -A Configs)\" ]; then" >> start.sh &&\
 #Populate the folder with the original files for first start. The server will compile these.
 	echo "cp -a Configs_org/. Configs" >> start.sh &&\
 	echo "fi" >> start.sh &&\
-#Check if shared directory is empty on the host, if yes	
+#Check if shared directory is empty on the host, if yes
 	echo "if [ -z \"\$(ls -A Storage)\" ]; then" >> start.sh &&\
-#Populate the folder with the original files for first start. The server will compile these.	
+#Populate the folder with the original files for first start. The server will compile these.
 	echo "cp -a Storage_org/. Storage && export NEWGAME='1'" >> start.sh &&\
 	echo "fi" >> start.sh &&\
-#Replace partial world settings if a new game is started	
+#Replace partial world settings if a new game is started
 	echo "if [ ! -z '\$NEWGAME' ]; then" >> start.sh &&\
 #Example: World size x and y
 	echo "sed -i_org 's/\\(.*\"x\":.*\\)72\\(.*\\)/\\1'\$WORLD_SIZE_X'\\2/' /ecoserver/Configs/WorldGenerator.eco" >> start.sh &&\
