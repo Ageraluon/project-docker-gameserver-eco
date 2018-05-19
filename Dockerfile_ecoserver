@@ -56,6 +56,6 @@ RUN chmod +x start.sh
 ENTRYPOINT ["/ecoserver/start.sh"]
 
 #Ports that need to be exposed to the host
-EXPOSE 2999 3000 3001
+EXPOSE 3000/udp 3001
 
 
