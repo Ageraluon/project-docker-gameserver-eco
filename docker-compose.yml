@@ -6,8 +6,7 @@ services:
         dockerfile: Dockerfile_ecoserver #Name of the dockerfile from which to build the image
       container_name: ecoserver #container name in docker
       ports:
-        - "2999:2999" #If you want to use different ports, change the first value of each line
-        - "3000:3000"
+        - "3000:3000/udp" #If you want to use different ports, change the first value of each line
         - "3001:3001"
       environment:
         - WORLD_SIZE_X=100 #Example values that can be changed for the first start of a server (i.e. for an empty Storage folder)
